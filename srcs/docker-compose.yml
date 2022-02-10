@@ -14,6 +14,13 @@ services:
       - www.${DOMAIN_NAME}:127.0.0.1
     networks:
       - inception
+    args:
+      - DOCKER_VOLUMES:${DOCKER_VOLUMES}
+      - DOMAIN_NAME:${DOMAIN_NAME}
+      - NGINX_CERT_DIR=${NGINX_CERT_DIR}
+      - NGINX_AUTOINDEX=${NGINX_AUTOINDEX}
+    environment:
+      - DOMAIN_NAME:${DOMAIN_NAME}
 
   wordpress-php:
     depends_on:

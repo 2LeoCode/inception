@@ -1,5 +1,8 @@
 from	debian:buster
 
+arg		DOCKER_VOLUMES
+
+
 add		setup /tmp
 add		boot /root
 
