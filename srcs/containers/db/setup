@@ -1,0 +1,49 @@
+#!/bin/bash
+
+service mysql stop
+usermod -d /var/lib/mysql/ mysql
+service mysql start
+
+echo "Initializing MariaDB..."
+
+expect -c "set timeout 30
+spawn mysql_secure_installation
+
+expect \"Enter current password for root (enter for none):\"
+send \"\r\"
+
+expect \"Set root password?\"
+send \"y\r\"
+
+expect \"New password:\"
+send \"$MYSQL_ROOT_PASSWORD\r\"
+
+expect \"Re-enter new password:\"
+send \"$MYSQL_ROOT_PASSWORD\r\"
+
+expect \"Remove anonymous users?\"
+send \"y\r\"
+
+expect \"Disallow root login remotely?\"
+send \"y\r\"
+
+expect \"Remove test database and access to it?\"
+send \"y\r\"
+
+expect \"Reload privilege tables now?\"
+send \"n\r\"
+
+expect eof"
+
+mariadb < /usr/share/phpmyadmin/sql/create_tables.sql
+mariadb << EOF
+$(envsubst < /tmp/db-config.sql)
+EOF
+
+mariadb_data=$(grep -R datadir /etc/mysql/mariadb.conf.d/50-server.cnf | awk '{print $3}')
+mkdir -p $DOCKER_VOLUMES/db
+chown -R mysql:mysql $DOCKER_VOLUMES/db
+cp -Rp $mariadb_data/* $DOCKER_VOLUMES/db
+sed -i "s/$mariadb_data/$DOCKER_VOLUMES\/db/" < /etc/mysql/mariadb.conf.d/50-server.cnf
+
+rm -rf /tmp/pma-config.sql /tmp/setup

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+service php3.7-fpm start
+
+pid=$(cat /run/php/php7.3-fpm.pid)
+while ps ax | awk '{print $1}' | grep $pid
+do
+	sleep 60
+done
+
+echo "php-fpm services stopped, exiting container..."

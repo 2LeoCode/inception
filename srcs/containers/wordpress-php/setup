@@ -1,0 +1,33 @@
+#!/bin/bash
+
+cd /tmp
+wget https://wordpress.org/latest.tar.gz
+tar -xvzf latest.tar.gz
+rm -rf latest.tar.gz
+mkdir -p $DOCKER_VOLUMES\
+	/var/lib/phpmyadmin/tmp\
+	$DOCKER_VOLUMES/wordpress/save\
+	$DOCKER_VOLUMES/wordpress/upload
+touch wordpress/.htacces
+mkdir wordpress/wp-content/upgrade
+mv wordpress $DOCKER_VOLUMES
+sudo chown -R www-data:www-data $DOCKER_VOLUMES/wordpress
+sudo chmod 755 -R $DOCKER_VOLUMES/wordpress
+find $DOCKER_VOLUMES/wordpress/ -type d -exec chmod 750 {}
+find $DOCKER_VOLUMES/wordpress/ -type f -exec chmod 640 {}
+wget https://files.phpmyadmin.net/phpMyAdmin/5.2.0-rc1/phpMyAdmin-5.2.0-rc1-all-languages.zip
+unzip phpMyAdmin-5.2.0-rc1-all-languages.zip
+mv phpMyAdmin-4.9.7-all-languages/ /usr/share/phpmyadmin
+chown -R www-data:www-data /var/lib/phpmyadmin
+
+export $(\
+	curl -s https://api.wordpress.org/secret-key/1.1/salt/\
+	| sed 's/define(//'\
+	| sed "s/'/WP_/"\
+	| tr -d "' "\
+	| sed -r 's/(.*)\);/\1/'\
+	| sed 's/,/=/';\
+	echo "PHP_BLOWFISH=$(pwgen -s 32 1)"\ 
+)
+
+rm -rf /tmp/setup

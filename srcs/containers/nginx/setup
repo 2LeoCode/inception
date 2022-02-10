@@ -1,0 +1,7 @@
+#!/bin/bash
+
+service nginx stop
+mkdir -p /var/www/inception /etc/nginx/ssl /home/lsuardi/data
+chmod 755 /var/www/inception
+
+rm -rf /tmp/setup

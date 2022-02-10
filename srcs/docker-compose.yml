@@ -1,0 +1,46 @@
+services:
+
+  nginx:
+    depends_on:
+      - wordpress-php
+    build: ./containers/nginx
+    ports:
+      - 443:443
+    volumes:
+      - wordpress:${DOCKER_VOLUMES}/wordpress
+      - log:/var/log
+    extra_hosts:
+      - ${DOMAIN_NAME}:127.0.0.1
+      - www.${DOMAIN_NAME}:127.0.0.1
+    networks:
+      - inception
+
+  wordpress-php:
+    depends_on:
+      - database
+    build: ./containers/wordpress-php
+    volumes:
+      - wordpress:${DOCKER_VOLUMES}/wordpress
+      - log:/var/log
+    networks:
+      inception
+
+  database:
+    build: ./containers/db
+    volumes:
+      - db:${DOCKER_VOLUMES}/db
+      - log:/var/log
+    networks: inception
+
+
+networks:
+
+  inception:
+    driver: bridge
+
+
+volumes:
+
+  wordpress: {}
+  db: {}
+  log: {}

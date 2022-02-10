@@ -1,0 +1,16 @@
+#!/bin/bash
+
+sed -i "s/%/$NGINX_AUTOINDEX/g" /etc/nginx/sites-enabled/inception
+
+ln -rs $DOCKER_VOLUMES/wordpress /var/www/inception/html
+chown -R $USER:$USER /var/www/inception/html
+
+service nginx start
+
+pid=$(cat /run/nginx.pid)
+while ps ax | awk '{print $1}' | grep $pid
+do
+	sleep 60
+done
+
+echo "Nginx services stopped, exiting container..."
